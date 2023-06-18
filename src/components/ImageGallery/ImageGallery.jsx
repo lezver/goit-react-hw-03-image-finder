@@ -20,66 +20,58 @@ export class ImageGallery extends Component {
     isLoading: false,
   };
 
-  async componentDidUpdate(prevProps, prevState) {
-    if (prevProps.searchText !== this.props.searchText) {
-      try {
-        this.setState({ searchData: [], isLoading: true, page: 1 });
+  componentDidUpdate(prevProps, prevState) {
+    const { searchText } = this.props;
 
-        search.resetPage();
+    if (prevProps.searchText !== searchText) {
+      this.setState({ searchData: [], isLoading: true, page: 1 });
 
-        const { searchText } = this.props;
-
-        const searchData = await search.fetchImages(searchText);
-
-        const {
-          data: { hits },
-        } = searchData;
-
-        if (hits.length === 0) {
-          Notiflix.Notify.warning(
-            "We're sorry, but we didn't find anything for your search..."
-          );
-          this.setState({ isLoading: false });
-        } else {
-          const value = searchText.split('+').join(' ');
-
-          Notiflix.Notify.success(
-            `Here's what we found on your request: ${value.toUpperCase()}`
-          );
-
-          this.setState({
-            searchData: [...hits],
-            isLoading: false,
-          });
-        }
-      } catch (error) {
-        this.setState({
-          error,
-        });
-      }
-    } else if (prevState.page !== this.state.page) {
-      try {
-        this.setState({ isLoading: true });
-
-        const { searchText } = this.props;
-
-        const searchData = await search.fetchImages(searchText);
-
-        const {
-          data: { hits },
-        } = searchData;
-
-        this.setState({
-          searchData: [...prevState.searchData, ...hits],
-          isLoading: false,
-        });
-      } catch (error) {
-        this.setState({
-          error,
-        });
-      }
+      this.handleSearch(searchText);
     }
   }
+
+  handleSearch = async searchText => {
+    try {
+      const searchData = await search.fetchImages(searchText);
+      if (searchData.length) {
+        const value = searchText.split('+').join(' ');
+
+        Notiflix.Notify.success(
+          `Here's what we found on your request: ${value.toUpperCase()}`
+        );
+
+        this.setState({
+          searchData: [...searchData],
+          isLoading: false,
+        });
+      } else {
+        Notiflix.Notify.warning(
+          "We're sorry, but we didn't find anything for your search..."
+        );
+        this.setState({ isLoading: false });
+      }
+    } catch (error) {
+      this.setState({
+        error,
+      });
+    }
+  };
+
+  handleUpdatePage = async searchText => {
+    try {
+      this.setState({ isLoading: true });
+      const searchData = await search.fetchImages(searchText);
+      this.setState(prevState => ({
+        isLoading: false,
+        searchData: [...prevState.searchData, ...searchData],
+      }));
+      this.setState({ isLoading: false });
+    } catch (error) {
+      this.setState({
+        error,
+      });
+    }
+  };
 
   hiddenHandler = data => {
     if (data) {
@@ -95,8 +87,9 @@ export class ImageGallery extends Component {
   };
 
   loadingMore = () => {
-    search.changePage();
     this.setState(prevState => ({ page: prevState.page + 1 }));
+    search.changePage(this.state.page);
+    this.handleUpdatePage(this.props.searchText);
   };
 
   render() {

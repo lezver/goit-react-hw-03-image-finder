@@ -12,13 +12,13 @@ export class Search {
     const response = await axios.get(
       `${this.BASE_URL}?${this.KEY}&q=${value}&${this.OTHER_SETTINGS}&page=${this.PAGE}`
     );
-    return response;
+    return response.data.hits;
   }
 
-  changePage() {
-    this.PAGE += 1;
+  changePage(value) {
+    this.PAGE += value;
   }
-  resetPage() {
-    this.PAGE = 1;
+  resetPage(value) {
+    this.PAGE = value;
   }
 }
