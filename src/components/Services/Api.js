@@ -18,7 +18,8 @@ export class Search {
   changePage(value) {
     this.PAGE += value;
   }
-  resetPage(value) {
-    this.PAGE = value;
+
+  resetPage() {
+    this.PAGE = 1;
   }
 }

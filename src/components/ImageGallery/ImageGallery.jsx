@@ -16,7 +16,6 @@ export class ImageGallery extends Component {
     isHidden: false,
     dataFormModal: {},
     error: null,
-    page: 1,
     isLoading: false,
   };
 
@@ -24,8 +23,8 @@ export class ImageGallery extends Component {
     const { searchText } = this.props;
 
     if (prevProps.searchText !== searchText) {
-      this.setState({ searchData: [], isLoading: true, page: 1 });
-
+      this.setState({ searchData: [], isLoading: true });
+      search.resetPage();
       this.handleSearch(searchText);
     }
   }
@@ -51,9 +50,7 @@ export class ImageGallery extends Component {
         this.setState({ isLoading: false });
       }
     } catch (error) {
-      this.setState({
-        error,
-      });
+      this.setState({ error });
     }
   };
 
@@ -86,9 +83,8 @@ export class ImageGallery extends Component {
     }
   };
 
-  loadingMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
-    search.changePage(this.state.page);
+  loadingMore = value => {
+    search.changePage(value);
     this.handleUpdatePage(this.props.searchText);
   };
 
@@ -110,7 +106,7 @@ export class ImageGallery extends Component {
             </ul>
             {isLoading && <Loader />}
             {searchData.length >= 12 && (
-              <Button loadingMore={this.loadingMore} />
+              <Button loadingMore={() => this.loadingMore(1)} />
             )}
             <Modal
               closeModal={this.hiddenHandler}
