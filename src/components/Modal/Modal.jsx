@@ -36,4 +36,5 @@ export class Modal extends Component {
 Modal.propTypes = {
   isHidden: PropTypes.bool.isRequired,
   dataFormModal: PropTypes.object.isRequired,
+  closeModal: PropTypes.func.isRequired,
 };
